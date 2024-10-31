@@ -9,8 +9,9 @@
     <style>
         body { font-family: Arial, sans-serif; }
         #chat { max-width: 600px; margin: auto; }
-        #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
+        #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 5px; }
         #messageInput { width: 80%; }
+        button { width: 15%; }
     </style>
 </head>
 <body>
@@ -31,17 +32,24 @@
         messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
         appId: "YOUR_APP_ID"
     };
-    
+
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     function sendMessage() {
         const message = document.getElementById("messageInput").value;
-        db.collection("messages").add({
-            text: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById("messageInput").value = "";
+        if (message.trim() !== "") {
+            db.collection("messages").add({
+                text: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById("messageInput").value = "";
+            }).catch(error => {
+                console.error("Error adding message: ", error);
+            });
+        } else {
+            alert("Please enter a message!");
+        }
     }
 
     db.collection("messages").orderBy("timestamp").onSnapshot(snapshot => {
